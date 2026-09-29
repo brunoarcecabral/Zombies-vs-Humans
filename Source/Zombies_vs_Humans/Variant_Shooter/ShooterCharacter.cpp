@@ -12,6 +12,8 @@
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
 #include "ShooterGameMode.h"
+#include "ShooterGameMode.h" 
+#include "Variant_Shooter/InfectionPlayerState.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -62,17 +64,25 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 float AShooterCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// ignore if already dead
-	if (CurrentHP <= 0.0f)
-	{
-		return 0.0f;
-	}
+	if (CurrentHP <= 0.0f) return 0.0f;
 
-	// Reduce HP
 	CurrentHP -= Damage;
 
-	// Have we depleted HP?
 	if (CurrentHP <= 0.0f)
 	{
+		if (HasAuthority())
+		{
+			if (AInfectionPlayerState* PS = GetPlayerState<AInfectionPlayerState>())
+			{
+				if (PS->GetTeam() == EPlayerTeam::Survivor)
+				{
+					if (AShooterGameMode* GM = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
+					{
+						GM->PlayerInfected(GetController(), EventInstigator);
+					}
+				}
+			}
+		}
 		Die();
 	}
 
@@ -80,6 +90,22 @@ float AShooterCharacter::TakeDamage(float Damage, struct FDamageEvent const& Dam
 	OnDamaged.Broadcast(FMath::Max(0.0f, CurrentHP / MaxHP));
 
 	return Damage;
+}
+
+void AShooterCharacter::Die()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->DeactivateWeapon();
+	}
+
+	Tags.Add(DeathTag);
+	GetCharacterMovement()->StopMovementImmediately();
+	DisableInput(nullptr);
+	OnBulletCountUpdated.Broadcast(0, 0);
+	BP_OnDeath();
+
+	GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterCharacter::OnRespawn, RespawnTime, false);
 }
 
 void AShooterCharacter::DoAim(float Yaw, float Pitch)
@@ -280,49 +306,4 @@ AShooterWeapon* AShooterCharacter::FindWeaponOfType(TSubclassOf<AShooterWeapon> 
 	// weapon not found
 	return nullptr;
 
-}
-
-void AShooterCharacter::Die()
-{
-	// deactivate the weapon
-	if (IsValid(CurrentWeapon))
-	{
-		CurrentWeapon->DeactivateWeapon();
-	}
-
-	// increment the team score
-	if (AShooterGameMode* GM = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		GM->IncrementTeamScore(TeamByte);
-	}
-
-	// grant the death tag to the character
-	Tags.Add(DeathTag);
-		
-	// stop character movement
-	GetCharacterMovement()->StopMovementImmediately();
-
-	// disable controls
-	DisableInput(nullptr);
-
-	// reset the bullet counter UI
-	OnBulletCountUpdated.Broadcast(0, 0);
-
-	// call the BP handler
-	BP_OnDeath();
-
-	// schedule character respawn
-	GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterCharacter::OnRespawn, RespawnTime, false);
-}
-
-void AShooterCharacter::OnRespawn()
-{
-	// destroy the character to force the PC to respawn
-	Destroy();
-}
-
-bool AShooterCharacter::IsDead() const
-{
-	// the character is dead if their current HP drops to zero
-	return CurrentHP <= 0.0f;
 }

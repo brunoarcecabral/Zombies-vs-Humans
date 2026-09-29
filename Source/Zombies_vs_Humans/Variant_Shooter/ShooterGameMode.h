@@ -8,35 +8,37 @@
 
 class UShooterUI;
 
-/**
- *  Simple GameMode for a first person shooter game
- *  Manages game UI
- *  Keeps track of team scores
- */
 UCLASS(abstract)
 class ZOMBIES_VS_HUMANS_API AShooterGameMode : public AGameModeBase
 {
-	GENERATED_BODY()
-	
-protected:
-
-	/** Type of UI widget to spawn */
-	UPROPERTY(EditAnywhere, Category="Shooter")
-	TSubclassOf<UShooterUI> ShooterUIClass;
-
-	/** Pointer to the UI widget */
-	TObjectPtr<UShooterUI> ShooterUI;
-
-	/** Map of scores by team ID */
-	TMap<uint8, int32> TeamScores;
-
-protected:
-
-	/** Gameplay initialization */
-	virtual void BeginPlay() override;
+    GENERATED_BODY()
 
 public:
+    AShooterGameMode(); // Constructor para asignar el PlayerState
 
-	/** Increases the score for the given team */
-	void IncrementTeamScore(uint8 TeamByte);
+    // Llama el Character cuando su vida llega a 0
+    void PlayerInfected(AController* VictimController, AController* AttackerController);
+
+    virtual void PostLogin(APlayerController* NewPlayer) override;
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "Shooter")
+    TSubclassOf<UShooterUI> ShooterUIClass;
+
+    TObjectPtr<UShooterUI> ShooterUI;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Match", meta = (ClampMin = 10, Units = "s"))
+    float MatchDuration = 300.0f; // 5 minutos de partida
+
+    UPROPERTY(EditDefaultsOnly, Category = "Match", meta = (ClampMin = 5, Units = "s"))
+
+    FTimerHandle MatchTimerHandle;
+    
+
+    virtual void BeginPlay() override;
+
+    
+    void CheckWinCondition();
+    void OnMatchTimeUp();
+    void UpdateScoresUI();
 };
