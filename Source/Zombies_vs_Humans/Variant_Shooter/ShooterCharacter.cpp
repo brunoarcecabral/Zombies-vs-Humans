@@ -12,8 +12,10 @@
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
 #include "ShooterGameMode.h"
-#include "ShooterGameMode.h" 
+#include "Net/UnrealNetwork.h" 
 #include "Variant_Shooter/InfectionPlayerState.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -63,33 +65,47 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 float AShooterCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// ignore if already dead
+	// 1. Vital: Dejamos que Unreal procese sus propias reglas internas primero
+	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	// 2. Solo el Servidor está autorizado a modificar la vida real
+	if (!HasAuthority()) return 0.0f;
+
+	// 3. Prevenimos restar vida si ya está muerto
 	if (CurrentHP <= 0.0f) return 0.0f;
 
-	CurrentHP -= Damage;
+	// 4. Aplicamos el daño
+	CurrentHP -= ActualDamage;
 
+	// --- CARTEL VERDE DE DEBUG ---
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("✅ Servidor restó vida a %s. Le queda: %f"), *GetName(), CurrentHP));
+	}
+	// -----------------------------
+
+	// 5. Actualizamos la barra del servidor (Los clientes lo harán a través de su OnRep_CurrentHP)
+	OnDamaged.Broadcast(FMath::Max(0.0f, CurrentHP / MaxHP));
+
+	// 6. Si muere, disparamos la infección y el muñeco de trapo (Ragdoll)
 	if (CurrentHP <= 0.0f)
 	{
-		if (HasAuthority())
+		if (AInfectionPlayerState* PS = GetPlayerState<AInfectionPlayerState>())
 		{
-			if (AInfectionPlayerState* PS = GetPlayerState<AInfectionPlayerState>())
+			if (PS->GetTeam() == EPlayerTeam::Survivor)
 			{
-				if (PS->GetTeam() == EPlayerTeam::Survivor)
+				if (AShooterGameMode* GM = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
 				{
-					if (AShooterGameMode* GM = Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()))
-					{
-						GM->PlayerInfected(GetController(), EventInstigator);
-					}
+					GM->PlayerInfected(GetController(), EventInstigator);
 				}
 			}
 		}
-		Die();
+        
+		Multicast_Die();
+		GetWorld()->GetTimerManager().SetTimer(RespawnTimer, this, &AShooterCharacter::OnRespawn, RespawnTime, false);
 	}
 
-	// update the HUD
-	OnDamaged.Broadcast(FMath::Max(0.0f, CurrentHP / MaxHP));
-
-	return Damage;
+	return ActualDamage;
 }
 
 void AShooterCharacter::Die()
@@ -306,4 +322,104 @@ AShooterWeapon* AShooterCharacter::FindWeaponOfType(TSubclassOf<AShooterWeapon> 
 	// weapon not found
 	return nullptr;
 
+}
+void AShooterCharacter::OnRespawn()
+{
+	// Lógica para reaparecer al personaje
+}
+
+bool AShooterCharacter::IsDead() const
+{
+	// Devuelve la variable que determina si está muerto (ejemplo)
+	return false; 
+}
+
+void AShooterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    
+	// Le decimos al motor que la vida se sincronice por red
+	DOREPLIFETIME(AShooterCharacter, CurrentHP);
+}
+
+void AShooterCharacter::OnRep_CurrentHP()
+{
+	// Esta función corre en los Clientes. Obliga a que la barra de vida de la UI se actualice.
+	OnDamaged.Broadcast(FMath::Max(0.0f, CurrentHP / MaxHP));
+}
+
+void AShooterCharacter::FireLineTrace()
+{
+	if (!GetController()) return;
+	if (!IsLocallyControlled()) return;
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	// Le restamos 50 unidades de Unreal (aprox 50 cm) al eje Z para bajarlo al pecho
+	FVector TraceStart = CameraLocation - FVector(0.0f, 0.0f, 50.0f); 
+
+	// Calculamos el punto final desde el pecho hacia adelante, respetando la mira de la cámara
+	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * 5000.0f); 
+
+	Server_FireLineTrace(TraceStart, TraceEnd);
+}
+
+
+void AShooterCharacter::Server_FireLineTrace_Implementation(FVector TraceStart, FVector TraceEnd)
+{
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // No dispararnos a nosotros mismos
+
+	// CAMBIO 1: Cambiamos ECC_Visibility por ECC_Pawn (que es el canal de los personajes)
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Pawn, QueryParams);
+
+	if (bHit)
+	{
+		// CAMBIO 2: Imprime en pantalla (arriba a la izquierda) exactamente qué tocó el láser
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("El láser chocó contra: %s"), *HitResult.GetActor()->GetName()));
+		}
+
+		// Aplicamos el daño si es un personaje
+		if (AShooterCharacter* HitCharacter = Cast<AShooterCharacter>(HitResult.GetActor()))
+		{
+			UGameplayStatics::ApplyDamage(HitCharacter, 25.0f, GetController(), this, UDamageType::StaticClass());
+		}
+        
+		// Cortamos el láser donde chocó para que no atraviese paredes
+		TraceEnd = HitResult.ImpactPoint; 
+	}
+
+	Multicast_DrawLaser(TraceStart, TraceEnd);
+}
+
+void AShooterCharacter::Multicast_DrawLaser_Implementation(FVector TraceStart, FVector TraceEnd)
+{
+	// Dibuja una línea roja que dura 0.1 segundos (ideal para un disparo intermitente)
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 0.1f, 0, 2.0f);
+}
+
+void AShooterCharacter::Multicast_Die_Implementation()
+{
+	// 1. Frena al personaje en seco
+	GetCharacterMovement()->StopMovementImmediately();
+    
+	// 2. Le quita el teclado/mouse a la persona dueña de este personaje
+	if (IsLocallyControlled())
+	{
+		DisableInput(nullptr);
+	}
+
+	// 3. Oculta el arma si tenía una
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->DeactivateWeapon();
+	}
+
+	// 4. Llama a tu evento de Blueprint (BP_OnDeath) para activar el Ragdoll en todas las pantallas
+	BP_OnDeath();
 }

@@ -16,6 +16,9 @@
 AShooterProjectile::AShooterProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true; // Hace que el servidor sincronice la posición de esta bala con todas las pantallas
+    
+	// ... acá sigue el código que ya tenías ...
 
 	// create the collision component and assign it as the root
 	RootComponent = CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision Component"));
@@ -54,45 +57,29 @@ void AShooterProjectile::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void AShooterProjectile::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// ignore if we've already hit something else
-	if (bHit)
-	{
-		return;
-	}
-
+	if (bHit) return;
 	bHit = true;
 
-	// disable collision on the projectile
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// make AI perception noise
 	MakeNoise(NoiseLoudness, GetInstigator(), GetActorLocation(), NoiseRange, NoiseTag);
 
-	if (bExplodeOnHit)
+	// 1. EL DAÑO: Solo el servidor está autorizado a calcular impactos, explosiones y empujes
+	if (HasAuthority())
 	{
-		
-		// apply explosion damage centered on the projectile
-		ExplosionCheck(GetActorLocation());
-
-	} else {
-
-		// single hit projectile. Process the collided actor
-		ProcessHit(Other, OtherComp, Hit.ImpactPoint, -Hit.ImpactNormal);
-
+		if (bExplodeOnHit) ExplosionCheck(GetActorLocation());
+		else ProcessHit(Other, OtherComp, Hit.ImpactPoint, -Hit.ImpactNormal);
 	}
 
-	// pass control to BP for any extra effects
+	// 2. EFECTOS VISUALES: Todos (Servidor y Clientes) ejecutan el Blueprint para ver las partículas de explosión o sangre
 	BP_OnProjectileHit(Hit);
 
-	// check if we should schedule deferred destruction of the projectile
-	if (DeferredDestructionTime > 0.0f)
+	// 3. DESTRUCCIÓN: Solo el servidor destruye la bala. Al destruirla, desaparece de las pantallas de los clientes automáticamente.
+	if (HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &AShooterProjectile::OnDeferredDestruction, DeferredDestructionTime, false);
-
-	} else {
-
-		// destroy the projectile right away
-		Destroy();
+		if (DeferredDestructionTime > 0.0f)
+			GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &AShooterProjectile::OnDeferredDestruction, DeferredDestructionTime, false);
+		else
+			Destroy();
 	}
 }
 

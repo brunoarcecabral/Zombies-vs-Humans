@@ -155,6 +155,14 @@ protected:
 
 	/** Calculates the spawn transform for projectiles shot by this weapon */
 	FTransform CalculateProjectileSpawnTransform(const FVector& TargetLocation) const;
+	
+	// --- LÓGICA DE RED ---
+	/** RPC para pedirle al servidor que genere el proyectil de verdad */
+	UFUNCTION(Server, Reliable)
+	void Server_FireProjectile(const FVector& TargetLocation);
+
+	/** Función que corre solo en el servidor para instanciar la bala */
+	void ServerSpawnProjectile(const FVector& TargetLocation);
 
 public:
 

@@ -55,8 +55,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Health")
 	float MaxHP = 500.0f;
 
+	// --- ESTO ES LO NUEVO ---
 	/** Current HP remaining to this character */
-	float CurrentHP = 0.0f;
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentHP)
+	float CurrentHP;
+
+	UFUNCTION()
+	void OnRep_CurrentHP();
+	// ------------------------
 
 	/** Team ID for this character*/
 	UPROPERTY(EditAnywhere, Category="Team")
@@ -166,7 +172,18 @@ public:
 	//~End IShooterWeaponHolder interface
 
 protected:
+	// Obliga a todas las pantallas a simular la muerte (ragdoll)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Die();
+	
+	// El Cliente le manda las coordenadas al Servidor
+	UFUNCTION(Server, Reliable)
+	void Server_FireLineTrace(FVector TraceStart, FVector TraceEnd);
 
+	// El Servidor le dice a todas las pantallas que dibujen el láser
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_DrawLaser(FVector TraceStart, FVector TraceEnd);
+	
 	/** Returns true if the character already owns a weapon of the given class */
 	AShooterWeapon* FindWeaponOfType(TSubclassOf<AShooterWeapon> WeaponClass) const;
 
@@ -181,7 +198,11 @@ protected:
 	void OnRespawn();
 
 public:
-
-	/** Returns true if the character is dead */
+	// Función que vas a llamar desde el Blueprint cuando el jugador haga clic
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void FireLineTrace();
+	
 	bool IsDead() const;
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

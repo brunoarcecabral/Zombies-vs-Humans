@@ -15,7 +15,8 @@
 AShooterWeapon::AShooterWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	bReplicates = true; // ¡VITAL! Permite que el arma envíe mensajes del Cliente al Servidor
+	
 	// create the root
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
@@ -161,35 +162,46 @@ void AShooterWeapon::FireCooldownExpired()
 
 void AShooterWeapon::FireProjectile(const FVector& TargetLocation)
 {
-	// get the projectile transform
+	// 1. EFECTOS LOCALES: El jugador que dispara ve el retroceso, la animación y gasta la bala en su UI inmediatamente
+	WeaponOwner->PlayFiringMontage(FiringMontage);
+	WeaponOwner->AddWeaponRecoil(FiringRecoil);
+
+	--CurrentBullets;
+	if (CurrentBullets <= 0)
+	{
+		CurrentBullets = MagazineSize;
+	}
+	WeaponOwner->UpdateWeaponHUD(CurrentBullets, MagazineSize);
+
+	// 2. RED: Le pedimos al servidor que genere la bala que hace daño de verdad
+	if (PawnOwner && PawnOwner->HasAuthority())
+	{
+		ServerSpawnProjectile(TargetLocation); // Si somos el servidor, la disparamos directo
+	}
+	else
+	{
+		Server_FireProjectile(TargetLocation); // Si somos el cliente, le mandamos el RPC al servidor
+	}
+}
+
+void AShooterWeapon::Server_FireProjectile_Implementation(const FVector& TargetLocation)
+{
+	// El servidor recibe la petición del cliente y ejecuta el disparo
+	ServerSpawnProjectile(TargetLocation);
+}
+
+void AShooterWeapon::ServerSpawnProjectile(const FVector& TargetLocation)
+{
+	// Esta función corre SOLO en el servidor y crea el proyectil físico que todos van a ver
 	FTransform ProjectileTransform = CalculateProjectileSpawnTransform(TargetLocation);
-	
-	// spawn the projectile
+    
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.TransformScaleMethod = ESpawnActorScaleMethod::OverrideRootScale;
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.Instigator = PawnOwner;
 
-	AShooterProjectile* Projectile = GetWorld()->SpawnActor<AShooterProjectile>(ProjectileClass, ProjectileTransform, SpawnParams);
-
-	// play the firing montage
-	WeaponOwner->PlayFiringMontage(FiringMontage);
-
-	// add recoil
-	WeaponOwner->AddWeaponRecoil(FiringRecoil);
-
-	// consume bullets
-	--CurrentBullets;
-
-	// if the clip is depleted, reload it
-	if (CurrentBullets <= 0)
-	{
-		CurrentBullets = MagazineSize;
-	}
-
-	// update the weapon HUD
-	WeaponOwner->UpdateWeaponHUD(CurrentBullets, MagazineSize);
+	GetWorld()->SpawnActor<AShooterProjectile>(ProjectileClass, ProjectileTransform, SpawnParams);
 }
 
 FTransform AShooterWeapon::CalculateProjectileSpawnTransform(const FVector& TargetLocation) const
