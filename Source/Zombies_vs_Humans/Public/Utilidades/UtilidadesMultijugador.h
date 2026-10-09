@@ -15,5 +15,5 @@ class ZOMBIES_VS_HUMANS_API UUtilidadesMultijugador : public UBlueprintFunctionL
 	GENERATED_BODY()
 	
 	UFUNCTION(BlueprintCallable, Category = Utilidades)
-	static void MostrarRol(AActor* actor);
+	static void MostrarRol(AActor* actor, bool& Aut);
 };
