@@ -14,15 +14,7 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1363e703-121b-4d8a-8cb7-92f1905c89e9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FirstPerson/Blueprints/BP_FirstPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FirstPerson/Blueprints/BP_FirstPersonCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Utilidades/UtilidadesMultijugador.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Utilidades/UtilidadesMultijugador.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Utilidades/UtilidadesMultijugador.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Utilidades/UtilidadesMultijugador.h" afterDir="false" />
-    </list>
+    <list default="true" id="1363e703-121b-4d8a-8cb7-92f1905c89e9" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
