@@ -11,7 +11,7 @@ class UStaticMeshComponent;
 class USphereComponent;
 
 UCLASS()
-class ZOMBIES_VS_HUMANS_API AItemEquipBase : public AActor
+class ZOMBIES_VS_HUMANS_API AItemEquipBase : public AActor, public IPlayerInterface
 {
 	GENERATED_BODY()
 	

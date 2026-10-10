@@ -20,7 +20,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  A basic first person character
  */
 UCLASS(abstract)
-class AZombies_vs_HumansCharacter : public ACharacter
+class AZombies_vs_HumansCharacter : public ACharacter, public IPlayerInterface
 {
 	GENERATED_BODY()
 
@@ -78,10 +78,7 @@ protected:
 	/** Handles jump end inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
-
-protected:
-
-	/** Set up input action bindings */
+	
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	USkeletalMeshComponent* GetSkeletalMesh_Implementation();
 
