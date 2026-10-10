@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
+#include "Interfaces/PlayerInterface.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Zombies_vs_Humans.h"
 
@@ -66,6 +67,11 @@ void AZombies_vs_HumansCharacter::SetupPlayerInputComponent(UInputComponent* Pla
 	}
 }
 
+USkeletalMeshComponent* AZombies_vs_HumansCharacter::GetSkeletalMesh_Implementation()
+{
+	return GetMesh() ;
+}
+
 
 void AZombies_vs_HumansCharacter::MoveInput(const FInputActionValue& Value)
 {
@@ -118,3 +124,4 @@ void AZombies_vs_HumansCharacter::DoJumpEnd()
 	// pass StopJumping to the character
 	StopJumping();
 }
+

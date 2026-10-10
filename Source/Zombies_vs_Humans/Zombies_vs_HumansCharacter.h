@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Interfaces/PlayerInterface.h"
 #include "Zombies_vs_HumansCharacter.generated.h"
 
 class UInputComponent;
@@ -51,6 +52,8 @@ protected:
 	
 public:
 	AZombies_vs_HumansCharacter();
+	
+	virtual USkeletalMeshComponent* GetSkeletalMeshComponent() const { return FirstPersonMesh; }
 
 protected:
 
@@ -80,7 +83,7 @@ protected:
 
 	/** Set up input action bindings */
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	
+	USkeletalMeshComponent* GetSkeletalMesh_Implementation();
 
 public:
 
@@ -89,6 +92,6 @@ public:
 
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
+	
 };
 

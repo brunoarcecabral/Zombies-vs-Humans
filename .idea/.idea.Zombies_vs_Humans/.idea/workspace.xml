@@ -14,7 +14,19 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
+<<<<<<< Updated upstream
     <list default="true" id="1363e703-121b-4d8a-8cb7-92f1905c89e9" name="Changes" comment="" />
+=======
+    <list default="true" id="1363e703-121b-4d8a-8cb7-92f1905c89e9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Interfaces/PlayerInterface.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Interfaces/PlayerInterface.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zombies_vs_Humans/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/FirstPerson/Blueprints/BP_FirstPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FirstPerson/Blueprints/BP_FirstPersonCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Variant_Shooter/Blueprints/Pickups/Projectiles/Materials/M_Explosion.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Variant_Shooter/Blueprints/Pickups/Projectiles/Materials/M_Explosion.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Zombies_vs_HumansCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Zombies_vs_HumansCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Zombies_vs_HumansCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zombies_vs_Humans/Zombies_vs_HumansCharacter.h" afterDir="false" />
+    </list>
+>>>>>>> Stashed changes
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,7 +41,11 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://C:/Program Files/Epic Games/UE_5.7/Engine/Source/Runtime/Engine/Classes/Engine/EngineTypes.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.7/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Interfaces/PlayerInterface.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Items/ItemEquipBase.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Private/Utilidades/UtilidadesMultijugador.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Interfaces/PlayerInterface.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Items/ItemEquipBase.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Public/Utilidades/UtilidadesMultijugador.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/Zombies_vs_Humans/Zombies_vs_HumansCharacter.cpp" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -45,27 +61,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;C/C++ Project.Zombies_vs_Humans.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;rider.unittesting.toolwindow.stripe.button.shown&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;UnrealLinkOptionsId&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "C/C++ Project.Zombies_vs_Humans.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "rider.unittesting.toolwindow.stripe.button.shown": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CidrLocalAttachDebugger.recentlyUsed">
       <recent name="com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration" />
@@ -108,6 +125,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791400071990</updated>
+      <workItem from="1791587822416" duration="11887000" />
     </task>
     <servers />
   </component>
