@@ -32,8 +32,7 @@ class ZOMBIES_VS_HUMANS_API AShooterCharacter : public AZombies_vs_HumansCharact
 protected:
 
 	/** Fire weapon input action */
-	UPROPERTY(EditAnywhere, Category ="Input")
-	UInputAction* FireAction;
+	
 
 	/** Switch weapon input action */
 	UPROPERTY(EditAnywhere, Category ="Input")

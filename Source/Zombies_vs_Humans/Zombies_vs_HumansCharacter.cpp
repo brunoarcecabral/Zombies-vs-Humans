@@ -9,7 +9,10 @@
 #include "InputActionValue.h"
 #include "Interfaces/PlayerInterface.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 #include "Zombies_vs_Humans.h"
+
 
 AZombies_vs_HumansCharacter::AZombies_vs_HumansCharacter()
 {
@@ -60,7 +63,10 @@ void AZombies_vs_HumansCharacter::SetupPlayerInputComponent(UInputComponent* Pla
 		// Looking/Aiming
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AZombies_vs_HumansCharacter::LookInput);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AZombies_vs_HumansCharacter::LookInput);
+	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AZombies_vs_HumansCharacter::HacerLineTrace);
+	
 	}
+	
 	else
 	{
 		UE_LOG(LogZombies_vs_Humans, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
@@ -72,6 +78,45 @@ USkeletalMeshComponent* AZombies_vs_HumansCharacter::GetSkeletalMesh_Implementat
 	return GetMesh() ;
 }
 
+void AZombies_vs_HumansCharacter::RecibirDano(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+				  AController* InstigatedBy, AActor* DamageCauser)
+{
+	Vida = FMath::Clamp(Vida - Damage);
+}
+
+
+void AZombies_vs_HumansCharacter::HacerLineTrace()
+{
+	FVector Inicio = FirstPersonCameraComponent->GetComponentLocation();
+	FRotator Rotacion;
+	GetActorEyesViewPoint(Inicio, Rotacion);
+	
+	FVector Fin = Inicio + FirstPersonCameraComponent->GetForwardVector() * 1000.f;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); // para que no se golpee a sí mismo
+
+	bool bGolpeo = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		Inicio,
+		Fin,
+		ECC_Pawn,
+		Params
+	);
+
+	// Debug: dibuja la línea (verde si golpea, rojo si no)
+	DrawDebugLine(GetWorld(), Inicio, bGolpeo ? Hit.ImpactPoint : Fin,
+				  bGolpeo ? FColor::Green : FColor::Red, false, 0.f, 0, 1.f);
+
+	if (bGolpeo)
+	{
+		AActor* ActorGolpeado = Hit.GetActor();
+		UE_LOG(LogTemp, Warning, TEXT("Golpeé: %s"), *ActorGolpeado->GetName());
+		
+		AActor* ActorGolpeado->RecibirDano();
+	}
+}
 
 void AZombies_vs_HumansCharacter::MoveInput(const FInputActionValue& Value)
 {

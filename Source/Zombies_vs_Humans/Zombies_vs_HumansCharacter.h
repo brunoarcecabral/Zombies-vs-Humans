@@ -50,10 +50,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category ="Input")
 	class UInputAction* MouseLookAction;
 	
+	UPROPERTY(EditAnywhere,	BlueprintReadOnly, Category ="Input")
+	class UInputAction* FireAction;
+	
 public:
 	AZombies_vs_HumansCharacter();
 	
 	virtual USkeletalMeshComponent* GetSkeletalMeshComponent() const { return FirstPersonMesh; }
+	
+	UFUNCTION(BlueprintCallable)
+	void HacerLineTrace();
 
 protected:
 
@@ -90,5 +96,11 @@ public:
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 	
+	UPROPERTY()
+	float Vida = 50;
+	
+	UFUNCTION(BlueprintCallable)
+	void RecibirDano(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+				  AController* InstigatedBy, AActor* DamageCauser);
 };
 
